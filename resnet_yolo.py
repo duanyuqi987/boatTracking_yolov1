@@ -247,6 +247,7 @@ class ResNet(nn.Module):
         #x = self.fc(x)
         x = self.conv_end(x)
         x = self.bn_end(x)
+        print(x.size())
         x = F.sigmoid(x) #归一化到0-1
         #x = x.view(-1,7,7,30)
         x = x.permute(0,2,3,1) #(-1,7,7,30)
@@ -312,3 +313,31 @@ def resnet152(pretrained=False, **kwargs):
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
     return model
+
+
+
+
+def test():
+    import torch
+    from torch.autograd import Variable
+    model = resnet18()
+    
+    model.classifier = nn.Sequential(
+            nn.Linear(512 * 7 * 7, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, 1470),
+        )
+    
+    print(model.classifier[6]) 
+    #print(model)
+    img = torch.rand(2,3,448,448)
+    img = Variable(img)
+    output = model(img)
+    print(output.size())
+
+if __name__ == '__main__':
+    test()

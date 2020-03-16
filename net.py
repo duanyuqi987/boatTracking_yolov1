@@ -224,7 +224,7 @@ def test():
         )
     print(model.classifier[6]) 
     #print(model)
-    img = torch.rand(2,3,224,224)
+    img = torch.rand(2,3,448,448)
     img = Variable(img)
     output = model(img)
     print(output.size())

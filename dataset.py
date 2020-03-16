@@ -273,13 +273,13 @@ class yoloDataset(data.Dataset):
 def main():
     from torch.utils.data import DataLoader
     
-    file_root = '/home/duanyajun/文档/个人文档/目标识别项目学习/图像处理工具代码/水柱检测2019-12/image/jiu/images/'
+    file_root = '/home/duanyajun/文档/目标识别项目/自己改写代码/mobilenet_yolov1/ball_water/images/'
     train_dataset = yoloDataset(root=file_root,list_file='./mytrain.txt',train=True,transform = [transforms.ToTensor()] )
     train_loader = DataLoader(train_dataset,batch_size=1,shuffle=False,num_workers=0)
     train_iter = iter(train_loader)
     for i in range(100):
         img,target = next(train_iter)
-        print(img,target)
+        print(img.size(),target.size())
 
 
 if __name__ == '__main__':

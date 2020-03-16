@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import os
 #
 VOC_CLASSES = (    # always index 0
-     'boat')
+     'ball','watercolumn')
 
 
 def parse_rec(filename):
@@ -34,7 +34,7 @@ txt_file = open('mytrain.txt','w')
 #lines = [x[:-1] for x in lines]
 #print(lines)
 
-Annotations = '../boat/label_xml/'
+Annotations = '/home/duanyajun/文档/目标识别项目/自己改写代码/mobilenet_yolov1/ball_water/label_xml/'
 xml_files = os.listdir(Annotations)
 
 count = 0

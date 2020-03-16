@@ -13,6 +13,7 @@ import torch.nn as nn
 
 from net import vgg16, vgg16_bn
 from resnet_yolo import resnet50
+from shufflenetv2 import shufflenet_v2_x0_5,shufflenet_v2_x1_0
 import torchvision.transforms as transforms
 import cv2
 import numpy as np
@@ -31,9 +32,9 @@ flags.DEFINE_string('output', './data/10.mp4', 'path to output video')
 flags.DEFINE_string('output_format', 'XVID', 'codec used in VideoWriter when saving video to file')
 
 VOC_CLASSES = (    # always index 0
-                 "boat")
+                 "boat",'watercolumn')
 
-Color = [[0, 0, 0],
+Color = [[0, 0, 255],
                     [128, 0, 0],
                     [0, 128, 0],
                     [128, 128, 0],
@@ -202,6 +203,7 @@ def image_video(model,img):
     result = predict_gpu(model,img)
 #############
     for left_up,right_bottom,class_name,_,prob in result:
+        """
         x = abs(left_up[0]+right_bottom[0])//2
         y = abs(left_up[1]+right_bottom[1])//2
         if class_name in ('boat'):
@@ -231,15 +233,22 @@ def image_video(model,img):
                 #thickness = int(np.sqrt(64 / float(i + 1)) * 2.5)
                 thickness = int(10)
                 cv2.line(image, pts2[i - 1], pts2[i], (0, 0, 255), thickness)
+        """
         color = Color[VOC_CLASSES.index(class_name)]
         cv2.rectangle(image,left_up,right_bottom,color,2)
+        
         ##########
         label = "boat" +'-'+str(round(prob,2))
         text_size, baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
+        """
         if y >=220 and y <=650:
             p1 = (left_up[0], left_up[1]- text_size[1])
             cv2.rectangle(image, (p1[0] - 2//2, p1[1] - 2 - baseline), (p1[0] + text_size[0], p1[1] + text_size[1]), color, -1)
             cv2.putText(image, label, (p1[0], p1[1]+baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,255), 1, 8)
+        """
+        p1 = (left_up[0], left_up[1]- text_size[1])
+        cv2.rectangle(image, (p1[0] - 2//2, p1[1] - 2 - baseline), (p1[0] + text_size[0], p1[1] + text_size[1]), color, -1)
+        cv2.putText(image, label, (p1[0], p1[1]+baseline), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,255), 1, 8)
 
     return image
 
@@ -247,9 +256,10 @@ def image_video(model,img):
 
 
 if __name__ == '__main__':
-    model = resnet50()
+    #model = resnet50()
+    model = shufflenet_v2_x1_0()
     print('load model...')
-    model.load_state_dict(torch.load('./yolo_test_boat.pth'))
+    model.load_state_dict(torch.load('/home/duanyajun/文档/目标识别项目/自己改写代码/mobilenet_yolov1/yolo_test_boat.pth'))
     model.eval()
     model.cuda()
     
@@ -257,7 +267,7 @@ if __name__ == '__main__':
     #    vid = cv2.VideoCapture(int(FLAGS.video))
     #except:
     #    vid = cv2.VideoCapture(FLAGS.video)
-    vid = cv2.VideoCapture('/home/duanyajun/文档/目标识别项目/自己做的项目/船只跟踪检测/boat_yolov1/video/1.mp4')
+    vid = cv2.VideoCapture('/home/duanyajun/文档/目标识别项目/自己改写代码/mobilenet_yolov1/ball_water/9.mp4')
     out = None
 
     #if FLAGS.output:
@@ -268,16 +278,18 @@ if __name__ == '__main__':
     #    codec = cv2.VideoWriter_fourcc(*FLAGS.output_format)
     #    out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
     fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-    out = cv2.VideoWriter('/home/duanyajun/文档/目标识别项目/自己做的项目/船只跟踪检测/boat_yolov1/video/12.mp4', fourcc, int(vid.get(cv2.CAP_PROP_FPS)), (int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+    out = cv2.VideoWriter('/home/duanyajun/文档/目标识别项目/自己改写代码/mobilenet_yolov1/ball_water/109.mp4', fourcc, int(vid.get(cv2.CAP_PROP_FPS)), (int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))))
     while True:
         _, img = vid.read()
-
+        start = time.time()
         if img is None:
             logging.warning("Empty Frame")
             time.sleep(0.1)
             continue
 
         img = image_video(model,img)
+        end = time.time()
+        print("time: {:.03f}s, fps: {:.03f}".format(end-start, 1/(end-start)))
         #if FLAGS.output:
         #    out.write(img)
         out.write(img)
